@@ -1,0 +1,2 @@
+[RABBITMQ]
+http://localhost:15672

@@ -8,7 +8,7 @@ config.read("config.ini")
 
 
 tempoEspera 	= int(config.get("GERAL", "tempoEsperaSearch"))
-nomeFila 		= config.get("FILAS", "nomeFilaVerificaTeste")
+nomeFila 		= config.get("FILAS", "nomeFilaRecuperaPRs")
 
 
 sender = Sender(nomeFila)
@@ -25,7 +25,7 @@ cursor = conn.cursor(dictionary=True);
 
 cursor.execute("FLUSH QUERY CACHE;")
 cursor.execute("RESET QUERY CACHE;")
-cursor.execute("""select id, nameWithOwner from repositorios where qtdArquivosStringTeste is null""")
+cursor.execute("""select id, nameWithOwner from repositorios where temTeste = 1 and prs_recuperados is null""")
 for item in cursor.fetchall():
 	textJson = '{"id": '+str(item['id'])+', "nameWithOwner": "'+str(item['nameWithOwner'])+'"}'
 	sender.send(textJson)

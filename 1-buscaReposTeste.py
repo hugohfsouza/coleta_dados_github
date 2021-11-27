@@ -19,7 +19,6 @@ rangeInicial 	= "2000-01-01"
 rangeFinal 		= "2021-11-26"
 
 
-
 dbconfig = {
     "host":     config.get("MYSQL", "host"),
     "user":     config.get("MYSQL", "user"),
@@ -30,8 +29,8 @@ dbconfig = {
 conn = mysql.connector.connect(**dbconfig)
 cursor = conn.cursor();
 
-# linguagemReferencia = "C++"
 linguagemReferencia = "JAVA"
+# linguagemReferencia = "C++"
 # linguagemReferencia = "Javascript"
 # linguagemReferencia = "Python"
 # linguagemReferencia = "C"

@@ -12,11 +12,12 @@ config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
 
 
+# CONFIGURAÇÕES DE FILA E TOKEN
 tempoEspera 	= int(config.get("GERAL", "tempoEsperaSearch"))
 token 			= config.get("TOKENS", sys.argv[1])
-nomeFila 		= config.get("FILAS", "nomeFilaVerificaTeste")
+nomeFila 		= config.get("FILAS", "nomeFilaRecuperaPRs")
 
-
+# CONFIGURAÇÕES GERAIS
 headers = {'Authorization': token, 'Accept': 'application/vnd.github.v3+json'}
 status	= GetStatus();
 
@@ -36,6 +37,33 @@ dbconfig = {
 conn = mysql.connector.connect(pool_name = "verifica_testes", pool_size = 1,**dbconfig)
 cursor = conn.cursor();
 
+
+def registrarPRsEncontrados(repo_id):
+	cursor.execute("""UPDATE repositorios set prs_recuperados = 1 where id = %s""", (repo_id,) )
+	conn.commit()
+
+def salvarPR(repo_id, number, state, url, user, created_at, updated_at, closed_at, merged_at):
+	cursor.execute(
+		"""
+			INSERT INTO 
+				pull_requests 
+					(
+						repo_id, 
+						number, 
+						state, 
+						url, 
+						user, 
+						created_at, 
+						updated_at,
+						closed_at,
+						merged_at
+					)
+				VALUES 
+					( %s, %s, %s, %s, %s, %s, %s, %s, %s);
+
+
+		""", (repo_id, number, state, url, user, created_at, updated_at, closed_at, merged_at) )
+	conn.commit()
 
 def requisitarGithub(url, headerExtra=None):
 	while(True):
@@ -58,12 +86,33 @@ def requisitarGithub(url, headerExtra=None):
 
 
 def buscarPrs(repo):
-	print(repo['nameWithOwner'])
-	result = requisitarGithub("search/code?q=org.junit.Test+repo:"+str(repo['nameWithOwner'])+"&per_page=1")
-	qtdRegistros = result['total_count']
+	pagina = 1
 
-	cursor.execute("""UPDATE repositorios set qtdArquivosStringTeste  = %s where id = %s""", (qtdRegistros, repo['id'],) )
-	conn.commit()
+	result = requisitarGithub("repos/"+str(repo['nameWithOwner'])+"/pulls?state=all&sort=created&direction=desc&per_page=100&page="+str(pagina))
+	while(len(result) > 0):
+		for pr in result:
+			try:
+				salvarPR(
+					repo['id'], 
+					pr['number'], 
+					pr['state'], 
+					pr['url'],
+					pr['user']['login'], 
+					pr['created_at'], 
+					pr['updated_at'],
+					pr['closed_at'],
+					pr['merged_at']
+				)
+			except Exception as e:
+				pass
+				
+		pagina += 1
+		result = requisitarGithub("repos/"+str(repo['nameWithOwner'])+"/pulls?state=all&sort=created&direction=desc&per_page=100&page="+str(pagina))
+		print("["+str(repo['nameWithOwner'])+"] pagina: "+str(pagina))
+
+	registrarPRsEncontrados(repo['id'])
+	print("["+str(repo['nameWithOwner'])+"] CONCLUIDO ")
+	pass
 
 
 def callback(ch, method, properties, body):	

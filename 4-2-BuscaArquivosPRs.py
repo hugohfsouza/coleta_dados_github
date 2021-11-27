@@ -12,11 +12,12 @@ config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
 
 
+# CONFIGURAÇÕES DE FILA E TOKEN
 tempoEspera 	= int(config.get("GERAL", "tempoEsperaSearch"))
 token 			= config.get("TOKENS", sys.argv[1])
-nomeFila 		= config.get("FILAS", "nomeFilaVerificaTeste")
+nomeFila 		= config.get("FILAS", "nomeFilaRecuperaArquivos")
 
-
+# CONFIGURAÇÕES GERAIS
 headers = {'Authorization': token, 'Accept': 'application/vnd.github.v3+json'}
 status	= GetStatus();
 
@@ -36,6 +37,14 @@ dbconfig = {
 conn = mysql.connector.connect(pool_name = "verifica_testes", pool_size = 1,**dbconfig)
 cursor = conn.cursor();
 
+def salvarFilesPRBulk(listaItens):
+	sql = "INSERT INTO pull_request_files (pr_id, filename, additions, deletions, sha, status, changes, contents_url, patch) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s);"
+	cursor.executemany(sql, listaItens )
+	conn.commit()
+
+def registraArquivosEncontrados(pullRequest):
+    cursor.execute("""UPDATE pull_requests set analisado = 1 where id = %s""", (pullRequest['id'] ,) )
+    conn.commit()
 
 def requisitarGithub(url, headerExtra=None):
 	while(True):
@@ -46,9 +55,9 @@ def requisitarGithub(url, headerExtra=None):
 			print("esperando proxima janela")
 			time.sleep(tempoEspera)
 
-	url = "https://api.github.com/"+str(url)
 	while(True):
 		response = requests.get(url, headers=headers)
+		print(url)
 		if(response.status_code == 200 or response.status_code == 404 or response.status_code == 422):
 			break
 		else:
@@ -57,13 +66,52 @@ def requisitarGithub(url, headerExtra=None):
 	return json.loads(response.text)
 
 
-def buscarPrs(repo):
-	print(repo['nameWithOwner'])
-	result = requisitarGithub("search/code?q=org.junit.Test+repo:"+str(repo['nameWithOwner'])+"&per_page=1")
-	qtdRegistros = result['total_count']
+def buscarArquivos(pullRequest):
 
-	cursor.execute("""UPDATE repositorios set qtdArquivosStringTeste  = %s where id = %s""", (qtdRegistros, repo['id'],) )
-	conn.commit()
+	pagina = 1
+	result = requisitarGithub(str(pullRequest['url'])+"/files?per_page=100&page="+str(pagina))
+	
+	while(len(result) > 0 and (not 'errors' in result) ):
+		listaArquivosPR = []
+		print(pullRequest['id'])
+
+		for file in result:
+			patch = "";
+
+			if ('patch' in file):
+				patch = file['patch']
+
+			listaArquivosPR.append(
+				(
+					pullRequest['id'], 
+					file['filename'],
+					file['additions'],
+					file['deletions'],
+					file['sha'],
+					file['status'],
+					file['changes'],
+					file['contents_url'],
+					patch
+				)
+			)
+
+		try:
+			salvarFilesPRBulk(listaArquivosPR)
+		except Exception as e:
+			print(e)
+			pass
+	
+		if(len(result) == 100):
+			pagina += 1
+			result = requisitarGithub(str(pullRequest['url'])+"/files?per_page=100&page="+str(pagina))
+		else:
+			result = []
+
+
+	registraArquivosEncontrados(pullRequest)
+	pass
+
+
 
 
 def callback(ch, method, properties, body):	
@@ -72,12 +120,11 @@ def callback(ch, method, properties, body):
 
 	ch.basic_ack(delivery_tag=method.delivery_tag)
 	jsonResponse = json.loads(body.decode())
-	buscarPrs(jsonResponse)
+	buscarArquivos(jsonResponse)
 	
-
-
+print("Esperando novos itens")
 channel.basic_qos(prefetch_count=1)
 channel.basic_consume(queue=nomeFila, on_message_callback=callback)
 channel.start_consuming()
-print("Esperando novos itens")
+
 
