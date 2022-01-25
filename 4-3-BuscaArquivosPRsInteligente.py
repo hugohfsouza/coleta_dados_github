@@ -7,6 +7,7 @@ import mysql.connector
 import sys
 from GetStatus import GetStatus
 import pika
+import os
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
@@ -36,24 +37,23 @@ dbconfig = {
 conn = mysql.connector.connect(pool_name = "verifica_testes", pool_size = 1,**dbconfig)
 cursor = conn.cursor();
 
-def salvarFilesPRBulk(listaItens):
 
-	try:
-		sql = "INSERT INTO pull_request_files (pr_id, filename, additions, deletions, sha, status, changes, contents_url, patch) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s);"
-		cursor.executemany(sql, listaItens )
-		conn.commit()
-	except Exception as e:
-		print("fazendo um a um")
-		try:
-			for item in listaItens:
-				sql = "INSERT INTO pull_request_files (pr_id, filename, additions, deletions, sha, status, changes, contents_url, patch) VALUES (%s,%s, %s, %s, %s, %s, %s, %s, %s);"
-				cursor.execute(sql, (item[0], item[1], item[2], item[3], item[4], item[5], item[6], item[7], item[8]) )
-				conn.commit()
-		except Exception as ex:
-			print(ex)
+def salvarDados(pr_id, dados):
+	sql = "UPDATE pull_requests SET hasTest = %s, hasCode = %s, hasOutros = %s, qtdArqTest= %s , qtdArqCode= %s , qtdArqOutros= %s , qtdAdditions= %s , qtdDeletions = %s, datetime_analisado = now() where id = %s;"
+	cursor.execute(sql, (
+		dados['hasTest'],
+		dados['hasCode'],
+		dados['hasOutros'],
+		dados['teste'],
+		dados['codigo'],
+		dados['outros'],
+		dados['adicionadas'],
+		dados['removidas'],
+		pr_id,
+	))
+	conn.commit()
 
 
-	
 
 def registraArquivosEncontrados(pullRequest):
     cursor.execute("""UPDATE pull_requests set analisado = 1 where id = %s""", (pullRequest['id'] ,) )
@@ -89,46 +89,98 @@ def buscarArquivos(pullRequest):
 	print("Buscando PR: "+ str(pullRequest['id']))
 	pagina = 1
 	result = requisitarGithub(str(pullRequest['url'])+"/files?per_page=100&page="+str(pagina))
-	
-	while(len(result) > 0 and (not 'errors' in result) ):
-		listaArquivosPR = []
-		# print(pullRequest['id'])
+	listaArquivosPR = []
 
+	while(len(result) > 0 and (not 'errors' in result) ):
 		for file in result:
 			patch = "";
 
 			if ('patch' in file):
 				patch = file['patch']
-
-			listaArquivosPR.append(
-				(
-					pullRequest['id'], 
-					file['filename'],
-					file['additions'],
-					file['deletions'],
-					file['sha'],
-					file['status'],
-					file['changes'],
-					file['contents_url'],
-					patch
+			try:
+				listaArquivosPR.append(
+					(
+						pullRequest['id'], 
+						file['filename'],
+						file['additions'],
+						file['deletions'],
+						file['sha'],
+						file['status'],
+						file['changes'],
+						file['contents_url'],
+						patch
+					)
 				)
-			)
-
-		try:
-			salvarFilesPRBulk(listaArquivosPR)
-		except Exception as e:
-			print(e)
-			pass
-	
+			except:
+				pass
+		
 		if(len(result) == 100):
 			pagina += 1
 			result = requisitarGithub(str(pullRequest['url'])+"/files?per_page=100&page="+str(pagina))
 		else:
 			result = []
 
+	return listaArquivosPR
 
+
+def processar(pullRequest):
+
+	alteracoes = buscarArquivos(pullRequest)
+
+	extensoesArquivosCodigoTeste = {
+		'JAVA': ['.java'],
+		'C++': ['.cpp', '.c', '.h', '.hpp'],
+		'Javascript': ['.js', '.ejs'],
+		'Python': ['.py'],
+		'C': ['.cpp', '.c', '.h', '.hpp'],
+		'C#': ['.cs'],
+		'Ruby': ['.rb'],
+	}
+
+
+	resultado = {
+		'codigo': 0,
+		'teste' : 0,
+		'outros': 0,
+		'adicionadas': 0,
+		'removidas': 0,
+
+		'hasTest': False,
+		'hasCode': False,
+		'hasOutros': False
+	}
+
+	for item in alteracoes:
+		filename, file_extension = os.path.splitext(item[1])
+		
+		resultado['adicionadas'] += item[2]
+		resultado['removidas'] += item[3]
+
+		if(file_extension in extensoesArquivosCodigoTeste[pullRequest['linguagemReferencia']]):
+			if('test' in filename or 'test' in item[7]):
+				resultado['teste'] += 1
+			else:
+				resultado['codigo'] += 1
+
+		else:
+			resultado['outros'] += 1
+
+	if(resultado['teste'] > 0):
+		resultado['hasTest'] = True
+
+	if(resultado['codigo'] > 0):
+		resultado['hasCode'] = True
+
+	if(resultado['outros'] > 0):
+		resultado['hasOutros'] = True
+
+	# print(resultado)
+	salvarDados(pullRequest['id'], resultado)
 	registraArquivosEncontrados(pullRequest)
-	pass
+
+
+
+# processar({'id': 1420662, 'url': 'https://api.github.com/repos/cake-build/cake/pulls/420', 'linguagemReferencia': 'C#'})
 
 
 
@@ -138,15 +190,15 @@ def callback(ch, method, properties, body):
 	# print(" [x] Done")
 
 	ch.basic_ack(delivery_tag=method.delivery_tag)
-	buscarArquivos(json.loads(body.decode()))
+	processar(json.loads(body.decode()))
 
 
 # CONFIGURAÇÃO DE FILAS
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', heartbeat=3600))
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost', heartbeat=60000))
 channel = connection.channel()
 channel.queue_declare(queue=nomeFila, durable=True)
 
-# python .\4-2-BuscaArquivosPRs.py token1
+# python .\4-3-BuscaArquivosPRsInteligente.py token1
 	
 print("Esperando novos itens")
 channel.basic_qos(prefetch_count=1)

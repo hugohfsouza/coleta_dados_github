@@ -1,5 +1,5 @@
 import configparser
-import json
+import time
 import mysql.connector
 from Queue import Sender
 
@@ -25,7 +25,18 @@ cursor = conn.cursor(dictionary=True);
 
 cursor.execute("FLUSH QUERY CACHE;")
 cursor.execute("RESET QUERY CACHE;")
-cursor.execute("""select id, nameWithOwner from repositorios where qtdArquivosStringTeste is null""")
+cursor.execute("""select id, nameWithOwner, linguagemReferencia from repositorios where qtdArquivosStringTeste is null""")
+# cursor.execute("""select id, nameWithOwner, linguagemReferencia from repositorios where id =444 """)
+
+totalParaEsperar = 200
+totalAgora = 0
+
 for item in cursor.fetchall():
-	textJson = '{"id": '+str(item['id'])+', "nameWithOwner": "'+str(item['nameWithOwner'])+'"}'
+	textJson = '{"id": '+str(item['id'])+', "nameWithOwner": "'+str(item['nameWithOwner'])+'", "linguagem": "'+str(item['linguagemReferencia'])+'"}'
 	sender.send(textJson)
+	totalAgora += 1
+
+	# if(totalAgora >= totalParaEsperar):
+	# 	print("Aguardando respiro");
+	# 	time.sleep(60)
+	# 	totalAgora = 0

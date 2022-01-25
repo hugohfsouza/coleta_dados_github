@@ -1,0 +1,66 @@
+# select nameWithOwner, linguagemReferencia, qtdArquivosStringTeste from repositorios
+
+library(ggplot2)
+
+#dim1 <- read.csv("C:/Users/hhfs/Documents/GitHub/coleta_dados_github/Scripts_R/qtdStringTest.csv", header=T,sep=",")
+
+
+library(ggplot2)
+library(vroom)
+library(tidyverse)
+
+dim1 <- vroom::vroom("C:/Users/hhfs/Documents/GitHub/coleta_dados_github/Scripts_R/qtdStringTest.csv")
+
+
+# Linhas de corte
+dim1_quantiles <- dim1 %>%
+  group_by(linguagemReferencia) %>%
+  summarise(quant25 = qtdArquivosStringTeste %>% quantile(0.25),
+            quant50 = qtdArquivosStringTeste %>% quantile(0.50),
+            quant75 = qtdArquivosStringTeste %>% quantile(0.75),
+            mean = qtdArquivosStringTeste %>% mean(),
+            median = qtdArquivosStringTeste %>% median()) %>%
+  as.data.frame()
+
+dim1_quantiles
+
+ggplot(
+  dim1,
+  aes(x=linguagemReferencia, y=qtdArquivosStringTeste)
+) +
+  geom_boxplot(outlier.shape = NA) +
+  coord_cartesian(ylim = quantile(dim1$qtdArquivosStringTeste, c(0.1, .95)))
+
+# Quantidade de projetos desconsiderados
+quant_proj_desc <- dim1 %>%
+  left_join(dim1_quantiles %>% select(linguagemReferencia, quant25)) %>%
+  filter(qtdArquivosStringTeste < quant25) %>%
+  group_by(linguagemReferencia) %>%
+  summarise(desconsiderados = n())
+
+# Quantidade de projetos considerados
+quant_proj_consid <- dim1 %>%
+  left_join(dim1_quantiles %>% select(linguagemReferencia, quant25)) %>%
+  filter(qtdArquivosStringTeste >= quant25) %>%
+  group_by(linguagemReferencia) %>%
+  summarise(considerados = n())
+
+# Proporção considerados/desconsiderados
+quant_proj_desc %>%
+  full_join(quant_proj_consid) %>%
+  mutate(perc_consid = considerados / (considerados + desconsiderados) * 100)
+
+# Projetos desconsiderados
+dim1 %>%
+  left_join(dim1_quantiles %>% select(linguagemReferencia, quant25)) %>%
+  filter(qtdArquivosStringTeste < quant25)
+
+# Projetos considerados
+nomes_projetos_selecionados <- dim1 %>%
+  left_join(dim1_quantiles %>% select(linguagemReferencia, quant25)) %>%
+  filter(qtdArquivosStringTeste >= quant25)
+
+view(nomes_projetos_selecionados)
+
+
+write.csv(nomes_projetos_selecionados,"People.csv", row.names = FALSE)

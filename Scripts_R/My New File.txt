@@ -1,0 +1,14 @@
+[38;5;246m# A tibble: 4,047 x 4[39m
+   nameWithOwner               linguagemReferencia qtdArquivosStringTeste quant25
+   [3m[38;5;246m<chr>[39m[23m                       [3m[38;5;246m<chr>[39m[23m                                [3m[38;5;246m<dbl>[39m[23m   [3m[38;5;246m<dbl>[39m[23m
+[38;5;250m 1[39m Red5/red5-server            JAVA                                    21       7
+[38;5;250m 2[39m Marswin/MarsDaemon          JAVA                                     7       7
+[38;5;250m 3[39m alibaba/QLExpress           JAVA                                   109       7
+[38;5;250m 4[39m lenve/JavaEETest            JAVA                                   556       7
+[38;5;250m 5[39m dariuszseweryn/RxAndroidBle JAVA                                    81       7
+[38;5;250m 6[39m zhou-you/RxEasyHttp         JAVA                                    33       7
+[38;5;250m 7[39m immutables/immutables       JAVA                                   305       7
+[38;5;250m 8[39m uber/NullAway               JAVA                                    65       7
+[38;5;250m 9[39m jacoco/jacoco               JAVA                                   459       7
+[38;5;250m10[39m guoguibing/librec           JAVA                                   215       7
+[38;5;246m# ... with 4,037 more rows[39m

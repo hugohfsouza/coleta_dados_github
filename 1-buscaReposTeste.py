@@ -11,11 +11,11 @@ import datetime
 config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
 
-
-token 	= config.get("TOKENS", "token1")
+tempoEspera = 10
+token 	= config.get("TOKENS", sys.argv[1])
 headers	= {'Authorization': token}
 
-rangeInicial 	= "2000-01-01"
+rangeInicial 	= "2001-03-01"
 rangeFinal 		= "2021-11-26"
 
 
@@ -29,18 +29,19 @@ dbconfig = {
 conn = mysql.connector.connect(**dbconfig)
 cursor = conn.cursor();
 
-linguagemReferencia = "JAVA"
-# linguagemReferencia = "C++"
-# linguagemReferencia = "Javascript"
-# linguagemReferencia = "Python"
-# linguagemReferencia = "C"
-# linguagemReferencia = "C#"
-# linguagemReferencia = "Ruby"
+# "JAVA" 			python .\1-buscaReposTeste.py token1 JAVA   819
+# "C++" 			python .\1-buscaReposTeste.py token2 C++   471
+# "Javascript" 		python .\1-buscaReposTeste.py token3 Javascript
+# "Python" 			python .\1-buscaReposTeste.py token4 Python
+# "C" 				python .\1-buscaReposTeste.py token5 C  369
+# "C#" 				python .\1-buscaReposTeste.py token6 C#  220
+# "Ruby" 			python .\1-buscaReposTeste.py token7 Ruby 226
 
+linguagemReferencia = sys.argv[2]
 
 headers = {'Authorization': token,'Accept': 'application/vnd.github.v3+json'}
 
-
+# is:public language:JAVA fork:false mirror:false archived:false stars:>3000 sort:stars-asc
 queryInit = """ 
 {
   search(query: "is:public language:"""+ str(linguagemReferencia) +""" fork:false mirror:false archived:false stars:>3000 created:>#dataInicial# sort:stars-asc", type: REPOSITORY, first: 100, after: "#page#" ) {
@@ -81,6 +82,8 @@ queryInit = """
 def requisitarGithub(page, removePagina, dataInicial):
 	global queryInit;
 
+
+	# removePagina = True
 	if(removePagina):
 		query 	= queryInit.replace(', after: "#page#"', "")
 	else:
@@ -88,13 +91,27 @@ def requisitarGithub(page, removePagina, dataInicial):
 
 	query 	= query.replace('#dataInicial#', str(dataInicial))
 
+	# print(query)
+	# request = requests.post('https://api.github.com/graphql',json={'query': query}, headers=headers)	
+	# print("Request status code: "+ str(request.status_code))
 
-	request = requests.post('https://api.github.com/graphql',json={'query': query}, headers=headers)
-	
-	if request.status_code == 200:
-		return request.json()
-	else:
-		raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, query))
+
+	while(True):
+		response = requests.post('https://api.github.com/graphql',json={'query': query}, headers=headers)
+		if(response.status_code == 200 or response.status_code == 404 or response.status_code == 422):
+			break
+		else:
+			print("["+str(response.status_code)+"] tempo espera request")
+			time.sleep(tempoEspera)
+
+	return response.json()
+
+
+
+	# if request.status_code == 200:
+	# 	return request.json()
+	# else:
+	# 	raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, query))
 
 
 def busca(pagina):
@@ -109,6 +126,7 @@ def insertRepositorio(name, nameWithOwner, createdAt, databaseId, qtdPRs ,langua
 	global cursor
 	global linguagemReferencia
 
+	novo = False
 
 	try:
 		cursor.execute("""INSERT INTO repositorios(
@@ -121,8 +139,13 @@ def insertRepositorio(name, nameWithOwner, createdAt, databaseId, qtdPRs ,langua
 			linguagemReferencia) values (%s, %s, %s, %s, %s, %s, %s)""", 
 			(name, nameWithOwner, createdAt, databaseId, languages, qtdPRs, linguagemReferencia) )
 		conn.commit() 
+
+		novo = True
 	except Exception as e:
 		pass
+
+	if(novo):
+		print("Adicionando repositorio novo")
 		
 
 def verificarUsoApiGithub():
@@ -162,6 +185,7 @@ def requisitarPorData(dataInicial):
 				stringLinguagens = stringLinguagens[1:]
 					
 				countTestMacro += 1
+				print(repo['node']['name'])
 				insertRepositorio(
 					repo['node']['name'],
 					repo['node']['nameWithOwner'],
@@ -181,6 +205,7 @@ data = date.fromisoformat(rangeInicial)
 dataLimite = date.fromisoformat(rangeFinal)
 
 while(data <= dataLimite):
-	data = data + datetime.timedelta(days=5)
+	print("Fazendo dia "+str(data))
+	data = data + datetime.timedelta(days=90)
 	# print(data)
 	requisitarPorData(data)

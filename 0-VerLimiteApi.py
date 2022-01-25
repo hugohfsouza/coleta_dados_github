@@ -68,13 +68,20 @@ def verificarUsoApiGithub():
 		dt_object = datetime.fromtimestamp(y["resources"]["core"]['reset'])
 		dt_object_search = datetime.fromtimestamp(y["resources"]["search"]['reset'])
 		print("[R.N] "+str(y["resources"]["core"]['remaining']) + " [Reset] "+str(dt_object) )
-		print("[R.S] "+str(y["resources"]["search"]['remaining']) + " [Reset] "+str(dt_object_search) )
+		# print("[R.S] "+str(y["resources"]["search"]['remaining']) + " [Reset] "+str(dt_object_search) )
+		time.sleep(0.5)
 
 
 
 verificarExistenciaDeTokensNaBase(tokens)
 
 while(True):
+	cursor.close()
+	conn.close()
+
+	conn = mysql.connector.connect(pool_name = "mypool", pool_size = 1,**dbconfig)
+	cursor = conn.cursor();
+
 	verificarUsoApiGithub()
 	print("")
-	time.sleep(2)
+	time.sleep(20)

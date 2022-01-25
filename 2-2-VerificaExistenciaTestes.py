@@ -52,18 +52,33 @@ def requisitarGithub(url, headerExtra=None):
 		if(response.status_code == 200 or response.status_code == 404 or response.status_code == 422):
 			break
 		else:
-			print("["+str(response.status_code)+"]tempo espera request")
+			print("["+str(response.status_code)+"] tempo espera request")
 			time.sleep(tempoEspera)
 	return json.loads(response.text)
 
 
 def buscarPrs(repo):
 	print(repo['nameWithOwner'])
-	result = requisitarGithub("search/code?q=org.junit.Test+repo:"+str(repo['nameWithOwner'])+"&per_page=1")
+	result = requisitarGithub("search/code?q=test+repo:"+str(repo['nameWithOwner'])+"&per_page=1")
 	qtdRegistros = result['total_count']
+
+
 
 	cursor.execute("""UPDATE repositorios set qtdArquivosStringTeste  = %s where id = %s""", (qtdRegistros, repo['id'],) )
 	conn.commit()
+
+
+# buscaTestes = {
+# 	'Java' : 		['org.junit.'],  
+# 	'C': 			['test'],
+# 	'C#': 			['.test.'],
+# 	'C++': 			['test'],
+# 	'Javascript': 	['test'],
+# 	'Python' : 		['test'],
+# 	'Ruby':			['test']
+# }
+
+# print(buscaTestes);
 
 
 def callback(ch, method, properties, body):	
@@ -81,3 +96,13 @@ channel.basic_consume(queue=nomeFila, on_message_callback=callback)
 channel.start_consuming()
 print("Esperando novos itens")
 
+
+
+# python .\2-2-VerificaExistenciaTestes.py token1
+# python .\2-2-VerificaExistenciaTestes.py token2
+# python .\2-2-VerificaExistenciaTestes.py token3
+# python .\2-2-VerificaExistenciaTestes.py token4
+# python .\2-2-VerificaExistenciaTestes.py token5
+# python .\2-2-VerificaExistenciaTestes.py token6
+# python .\2-2-VerificaExistenciaTestes.py token7
+# python .\2-2-VerificaExistenciaTestes.py token8

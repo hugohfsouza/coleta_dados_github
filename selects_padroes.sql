@@ -1,8 +1,5 @@
-[RABBITMQ]
-http://localhost:15672
-.\rabbitmq-server.bat
-
-
+-- Qtd de repositorios recuperados por linguagem
+select linguagemReferencia, count(1) from repositorios group by linguagemReferencia
 
 
 
