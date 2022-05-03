@@ -19,47 +19,47 @@ linguagens = ['JAVA', 'C++', 'Javascript', 'Python', 'C', 'C#', 'Ruby' ]
 
 
 
-print("Quantidade de projetos com teste e sem teste em todas as linguagems e no geral")
-qtdProjetosComTeste = PrettyTable()
-qtdProjetosComTeste.field_names = ["Linguagem", "Classificaçao", "Numero de Projetos", "% de projetos"]
-geralComTeste = 0
-geralSemTeste = 0
+# print("Quantidade de projetos com teste e sem teste em todas as linguagems e no geral")
+# qtdProjetosComTeste = PrettyTable()
+# qtdProjetosComTeste.field_names = ["Linguagem", "Classificaçao", "Numero de Projetos", "% de projetos"]
+# geralComTeste = 0
+# geralSemTeste = 0
 
-for linguagem in linguagens:
-    cursor.execute(""" select count(1) from repositorios where linguagemReferencia = %s and (temTeste = 0 or temTeste is null) and educacional = 0""", (linguagem,)) 
-    dadoSemTeste = cursor.fetchone()
+# for linguagem in linguagens:
+#     cursor.execute(""" select count(1) from repositorios where linguagemReferencia = %s and (temTeste = 0 or temTeste is null) and educacional = 0""", (linguagem,)) 
+#     dadoSemTeste = cursor.fetchone()
 
-    cursor.execute(""" select count(1) from repositorios where linguagemReferencia = %s and temTeste = 1 and educacional = 0""", (linguagem,)) 
-    dadoComTeste = cursor.fetchone()
+#     cursor.execute(""" select count(1) from repositorios where linguagemReferencia = %s and temTeste = 1 and educacional = 0""", (linguagem,)) 
+#     dadoComTeste = cursor.fetchone()
 
-    total = dadoComTeste[0] + dadoSemTeste[0]
+#     total = dadoComTeste[0] + dadoSemTeste[0]
 
-    qtdProjetosComTeste.add_row([linguagem, "Com Teste", dadoComTeste[0] , (dadoComTeste[0]/total)*100 ])
-    qtdProjetosComTeste.add_row([linguagem, "Sem Teste", dadoSemTeste[0] , (dadoSemTeste[0]/total)*100 ])
+#     qtdProjetosComTeste.add_row([linguagem, "Com Teste", dadoComTeste[0] , (dadoComTeste[0]/total)*100 ])
+#     qtdProjetosComTeste.add_row([linguagem, "Sem Teste", dadoSemTeste[0] , (dadoSemTeste[0]/total)*100 ])
 
-print(qtdProjetosComTeste)
+# print(qtdProjetosComTeste)
 
 
-print("\n\n\n\n")
-print("Quantidade de projetos com teste e sem teste em todas as linguagems e no geral APENAS PROJETOS  EDUCACIONAIS")
-projetosEducacionais = PrettyTable()
-projetosEducacionais.field_names = ["Linguagem", "Classificaçao", "Numero de Projetos", "% de projetos"]
-geralComTeste = 0
-geralSemTeste = 0
+# print("\n\n\n\n")
+# print("Quantidade de projetos com teste e sem teste em todas as linguagems e no geral APENAS PROJETOS  EDUCACIONAIS")
+# projetosEducacionais = PrettyTable()
+# projetosEducacionais.field_names = ["Linguagem", "Classificaçao", "Numero de Projetos", "% de projetos"]
+# geralComTeste = 0
+# geralSemTeste = 0
 
-for linguagem in linguagens:
-    cursor.execute(""" select count(1) from repositorios where linguagemReferencia = %s and (temTeste = 0 or temTeste is null) and educacional = 1""", (linguagem,)) 
-    dadoSemTeste = cursor.fetchone()
+# for linguagem in linguagens:
+#     cursor.execute(""" select count(1) from repositorios where linguagemReferencia = %s and (temTeste = 0 or temTeste is null) and educacional = 1""", (linguagem,)) 
+#     dadoSemTeste = cursor.fetchone()
 
-    cursor.execute(""" select count(1) from repositorios where linguagemReferencia = %s and temTeste = 1 and educacional = 1""", (linguagem,)) 
-    dadoComTeste = cursor.fetchone()
+#     cursor.execute(""" select count(1) from repositorios where linguagemReferencia = %s and temTeste = 1 and educacional = 1""", (linguagem,)) 
+#     dadoComTeste = cursor.fetchone()
 
-    total = dadoComTeste[0] + dadoSemTeste[0]
+#     total = dadoComTeste[0] + dadoSemTeste[0]
 
-    projetosEducacionais.add_row([linguagem, "Com Teste", dadoComTeste[0] , (dadoComTeste[0]/total)*100 ])
-    projetosEducacionais.add_row([linguagem, "Sem Teste", dadoSemTeste[0] , (dadoSemTeste[0]/total)*100 ])
+#     projetosEducacionais.add_row([linguagem, "Com Teste", dadoComTeste[0] , (dadoComTeste[0]/total)*100 ])
+#     projetosEducacionais.add_row([linguagem, "Sem Teste", dadoSemTeste[0] , (dadoSemTeste[0]/total)*100 ])
 
-print(projetosEducacionais)
+# print(projetosEducacionais)
 
 
 
@@ -82,6 +82,7 @@ for linguagem in linguagens:
             and pr.hasTest = 1
             and pr.hasOutros = 0
             and r.educacional = 0
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosApenasTeste = cursor.fetchone()
@@ -96,6 +97,7 @@ for linguagem in linguagens:
             and pr.hasOutros = 0
             and r.educacional = 0
             and pr.merged_at is not null
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosApenasTesteAprovado = cursor.fetchone()
@@ -109,6 +111,7 @@ for linguagem in linguagens:
             and pr.hasTest = 0
             and pr.hasOutros = 0
             and r.educacional = 0
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosApenasCodigo = cursor.fetchone()
@@ -123,6 +126,7 @@ for linguagem in linguagens:
             and pr.hasOutros = 0
             and r.educacional = 0
             and pr.merged_at is not null
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosApenasCodigoAprovado = cursor.fetchone()
@@ -137,6 +141,7 @@ for linguagem in linguagens:
             and pr.hasTest = 0
             and pr.hasOutros = 1
             and r.educacional = 0
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosApenasOutros = cursor.fetchone()
@@ -151,6 +156,7 @@ for linguagem in linguagens:
             and pr.hasOutros = 1
             and r.educacional = 0
             and pr.merged_at is not null
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosApenasOutrosAprovado = cursor.fetchone()
@@ -165,6 +171,7 @@ for linguagem in linguagens:
             and pr.hasTest = 1
             and pr.hasOutros = 0
             and r.educacional = 0
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosTesteCodigo = cursor.fetchone()
@@ -179,6 +186,7 @@ for linguagem in linguagens:
             and pr.hasOutros = 0
             and r.educacional = 0
             and pr.merged_at is not null
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosTesteCodigoAprovado = cursor.fetchone()
@@ -193,6 +201,7 @@ for linguagem in linguagens:
             and pr.hasTest = 1
             and pr.hasOutros = 1
             and r.educacional = 0
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosTesteOutros = cursor.fetchone()
@@ -207,6 +216,7 @@ for linguagem in linguagens:
             and pr.hasOutros = 1
             and r.educacional = 0
             and pr.merged_at is not null
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosTesteOutrosAprovado = cursor.fetchone()
@@ -220,6 +230,7 @@ for linguagem in linguagens:
             and pr.hasTest = 0
             and pr.hasOutros = 1
             and r.educacional = 0
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosCodigoOutros = cursor.fetchone()
@@ -234,6 +245,7 @@ for linguagem in linguagens:
             and pr.hasOutros = 1
             and r.educacional = 0
             and pr.merged_at is not null
+            and pr.isBot = 0
                 
     """, (linguagem,)) 
     dadosCodigoOutrosAprovado = cursor.fetchone()
