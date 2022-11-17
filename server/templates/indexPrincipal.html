@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title></title>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+      <script type="text/javascript" src="{{url_for('static', filename='jquery.min.js')}}"></script>
+      <script type="text/javascript" src="{{url_for('static', filename='jquery.mask.min.js')}}"></script>
+
+      <script>
+        $(document).ready(function(){
+          $('.date').mask('00/00/0000');
+        })
+      </script>
+   </head>
+   <body>
+      <div class="container">
+        <div class="row mt-4">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">Dashboard</div>
+                <div class="card-body">
+                  <form method="POST" action="/indicadores">
+
+                    <div class="form-group">
+                      <label for="exampleInputEmail1">Equipe</label>
+                      <select name="equipe" id="equipe">
+                        <option value="MIP">MIP</option>
+                        <option value="STANDIN">STANDIN</option>
+                        <option value="DTW">Digital Twin</option>
+                        <option value="MP">Meios de Pagamentos</option>
+                        <option value="FEDNOW">FEDNOW</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="exampleInputEmail1">Data Inicial</label>
+                      <input type="text" class="form-control date" id="dataInicial" name="dataInicial" placeholder="Ex: 01/01/2021">
+                    </div>
+
+                    <div class="form-group">
+                      <label for="exampleInputEmail1">Data Final</label>
+                      <input type="text" class="form-control date" id="dataFinal" name="dataFinal" placeholder="Ex: 01/02/2021">
+                    </div>
+    
+          
+                    <button type="submit" class="btn btn-primary">Acessar</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+        </div>
+        
+
+        <div class="row mt-4">
+
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">Detalhamento</div>
+              <div class="card-body">
+                <form method="POST" action="/detalhamento">
+
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Equipe</label>
+                    <select name="equipe" id="equipe">
+                      <option value="MIP">MIP</option>
+                      <option value="STANDIN">STANDIN</option>
+                      <option value="DTW">Digital Twin</option>
+                      <option value="MP">Meios de Pagamentos</option>
+                      <option value="FEDNOW">FEDNOW</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Data Inicial</label>
+                    <input type="text" class="form-control date" id="dataInicial" name="dataInicial" placeholder="Ex: 01/01/2021">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Data Final</label>
+                    <input type="text" class="form-control date" id="dataFinal" name="dataFinal" placeholder="Ex: 01/02/2021">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">S.</label>
+                    <input type="password" class="form-control" id="gestor" name="gestor" placeholder="Ex: Pedro">
+                  </div>
+  
+        
+                  <button type="submit" class="btn btn-primary">Acessar</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+
+
+
+        <div class="row mt-4">
+
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">Apoios</div>
+              <div class="card-body">
+                <form method="POST" action="/apoios">
+
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Equipe</label>
+                    <select name="equipe" id="equipe">
+                      <option value="MIP">MIP</option>
+                      <option value="STANDIN">STANDIN</option>
+                      <option value="DTW">Digital Twin</option>
+                      <option value="MP">Meios de Pagamentos</option>
+                      <option value="FEDNOW">FEDNOW</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Data Inicial</label>
+                    <input type="text" class="form-control date" id="dataInicial" name="dataInicial" placeholder="Ex: 01/01/2021">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="exampleInputEmail1">Data Final</label>
+                    <input type="text" class="form-control date" id="dataFinal" name="dataFinal" placeholder="Ex: 01/02/2021">
+                  </div>
+
+                  <button type="submit" class="btn btn-primary">Acessar</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+
+      </div>
+   </body>
+</html>
