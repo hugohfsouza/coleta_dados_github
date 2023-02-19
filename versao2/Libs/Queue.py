@@ -9,14 +9,11 @@ class Sender():
         self.nomeFila = nomeFila
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host='localhost'))
+        self.channel = self.connection.channel()
+        self.channel.queue_declare(queue=self.nomeFila, durable=True)
 
     def send(self, message):
-
-        channel = self.connection.channel()
-
-        channel.queue_declare(queue=self.nomeFila, durable=True)
-
-        channel.basic_publish(
+        self.channel.basic_publish(
             exchange='',
             routing_key=self.nomeFila,
             body=message,

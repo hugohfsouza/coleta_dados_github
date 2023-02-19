@@ -69,3 +69,21 @@ class GithubConsumer:
 
 		return listaArquivosPR
 
+	def requisitaUrlUnica(self, urlBase):
+
+		verificaToken = True
+		while (verificaToken):
+			dadosToken = self.getToken()
+			if (dadosToken['espera'] != 0):
+				time.sleep(dadosToken['espera'])
+			else:
+				verificaToken = False
+
+		token = dadosToken['token']
+
+		url = urlBase
+		response = requests.get(url, headers={'Authorization': token, 'Accept': 'application/vnd.github.v3+json'})
+		result = json.loads(response.text)
+
+		return result
+
