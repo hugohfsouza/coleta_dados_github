@@ -20,17 +20,14 @@ dbconfig = {
 conn = mysql.connector.connect(pool_name = "mypool", pool_size = 1,**dbconfig)
 cursor = conn.cursor(dictionary=True);
 
-cursor.execute("FLUSH QUERY CACHE;")
-cursor.execute("RESET QUERY CACHE;")
+
+
 cursor.execute("""
 	select pull_requests.id, pull_requests.url, repositorios.linguagemReferencia
 		from pull_requests 
 		inner join repositorios on (pull_requests.repo_id = repositorios.id)
-		where repositorios.temTeste = 1 and repositorios.linguagemReferencia = 'Java' 
-		and pull_requests.hasCode = 0
-		and pull_requests.hasTest = 1
-		and pull_requests.hasOutros = 0
-
+		where repositorios.temTeste = 1 
+		and  json_files is null 
 """)
 
 totalParaEsperar = 200

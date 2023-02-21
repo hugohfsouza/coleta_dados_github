@@ -24,10 +24,17 @@ cursor.execute("""
 	select pull_requests.id, pull_requests.url, repositorios.linguagemReferencia
 		from pull_requests 
 		inner join repositorios on (pull_requests.repo_id = repositorios.id)
-		where repositorios.temTeste = 1
-		and pull_requests.hasTest = 1
+		where 1=1
+		and repositorios.id = 1275 
+		-- and status_analise = 'para-recuperar-body'
 """)
+
+def mudarStatusPullRequest(pullRequestId):
+	sql = "UPDATE pull_requests SET status_analise = 'em-recuperacao-body' where id = %s"
+	cursor.execute(sql, (pullRequestId,))
+	conn.commit()
 
 for item in cursor.fetchall():
 	textJson = '{"id": '+str(item['id'])+', "url": "'+str(item['url'])+'", "linguagem": "'+str(item['linguagemReferencia'])+'"}'
 	sender.send(textJson)
+	mudarStatusPullRequest(item['id'])

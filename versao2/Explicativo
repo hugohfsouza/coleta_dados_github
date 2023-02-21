@@ -4,12 +4,14 @@ https://api.github.com/repos/hugohfsouza/PRAnalyzer/pulls/2
 
 
 
-1 - RecuperaBodyPR-Consumidor.py
-2 - RecuperaBodyPR-Produtor.py
-3 - AnalisaExistenciaTaskComentarioEAdicionaFila.py
+3 - RecuperaBodyPR-Produtor.py
+4 - RecuperaBodyPR-Consumidor.py
+5 - AnalisaExistenciaTaskComentarioEAdicionaFila.py
     - Vai procurar os PRs que possuem alguma #999 na descricao do PR.
     - Vai salvar cada issue encontrada em pull_requests_issues
     - Vai mudar o status do pull_request para "para-extrair-dados-issues"
 
-4 - RecuperaDadosIssues-Consumidor
+6 - RecuperaDadosIssues-Consumidor
     - Busca a issue dentro do repositorio
+
+7 -

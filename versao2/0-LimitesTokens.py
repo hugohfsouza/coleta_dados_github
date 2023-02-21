@@ -6,7 +6,6 @@ from os import system
 import os
 import configparser
 
-system("title Verifica Limites de Requests no GITHUB")
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
@@ -37,10 +36,13 @@ def verificarUsoApiGithub():
 		url = "https://api.github.com/rate_limit"
 		response = requests.get(url, headers=headers)
 		y = json.loads(response.text)
-		
-		sql = "UPDATE tokens set requisicoes_restantes = "+str(y["resources"]["core"]['remaining'])+" where token = '"+str(token)+"'";
+		sql = "UPDATE tokens set requisicoes_restantes = " + str(0) + " where token = '" + str(token) + "'";
 
-		print(y["resources"]["core"]['remaining'])
+		if response.status_code == 200:
+			sql = "UPDATE tokens set requisicoes_restantes = "+str(y["resources"]["core"]['remaining'])+" where token = '"+str(token)+"'";
+			print(y["resources"]["core"]['remaining'])
+		else:
+			print("Erro ao consultar limites")
 
 		cur.execute(sql)
 		con.commit()

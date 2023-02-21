@@ -6,13 +6,13 @@ import configparser
 import mysql.connector
 
 
-# CONFIGURACOES
+# configurations
 config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
 nomeFila = config.get("FILAS", "nomeFilRecuperarBodyPR")
 
 
-# CONFIGURAÇÃO BANCO
+# database configurations
 dbconfig = {
 	"host":     config.get("MYSQL", "host"),
 	"user":     config.get("MYSQL", "user"),
@@ -24,14 +24,21 @@ cursor = conn.cursor(dictionary=True);
 
 githubConsumer = GithubConsumer()
 
+def mudarStatusPullRequest(pullRequestId):
+	sql = "UPDATE pull_requests SET status_analise = 'aguardando-analise-body' where id = %s"
+	cursor.execute(sql, (pullRequestId,))
+	conn.commit()
+
 def processar(array_dados):
-	dados = githubConsumer.requisitaUrlUnica(array_dados['url'])
+	dados, status_code = githubConsumer.requisitaUrlUnica(array_dados['url'])
 
 	# print(item['url'])
 	print(array_dados['id'])
 	sql = "UPDATE pull_requests SET json_request_pr = %s where id = %s"
-	cursor.execute(sql, (json.dumps(dados),array_dados	['id']))
+	cursor.execute(sql, (json.dumps(dados),array_dados['id']))
 	conn.commit()
+
+	mudarStatusPullRequest(array_dados['id'])
 
 
 def callback(ch, method, properties, body):

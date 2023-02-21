@@ -85,5 +85,5 @@ class GithubConsumer:
 		response = requests.get(url, headers={'Authorization': token, 'Accept': 'application/vnd.github.v3+json'})
 		result = json.loads(response.text)
 
-		return result
+		return result, response.status_code
 
