@@ -29,7 +29,7 @@ def extrair_mencoes(texto):
 	if texto != None:
 		# mencoes = re.findall(r'#\d+', texto)
 		# mencoes = re.findall(r'(close|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+\#\d+', texto)
-		mencoes = re.findall(r'(?:close|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+\#\d+', texto)
+		mencoes = re.findall(r'(?:close|closed|fix|fixes|fixed|resolve|resolves|resolved)\s+\#\d+', texto.lower())
 	return mencoes
 
 def extrair_mencoes_simples(texto):
@@ -76,8 +76,8 @@ cursor.execute("""
 	select pull_requests.id, pull_requests.json_request_pr, pull_requests.url
 		from pull_requests 
 		where 1=1 
-		and status_analise = 'aguardando-analise-body'
-		-- and id = 747811
+		 and status_analise = 'aguardando-analise-body'
+		-- and id = 747824
 """)
 
 for item in cursor.fetchall():
@@ -86,6 +86,8 @@ for item in cursor.fetchall():
 		dados = extrair_mencoes(jsonDados['body'])
 		print("Analisando body do :"+ str(item['id']))
 
+		print(jsonDados['body'])
+		print(dados)
 		if len(dados) > 0:
 			limparIssuesPR(item['id'])
 			adicionaIssues(item['id'], dados)
@@ -98,6 +100,7 @@ for item in cursor.fetchall():
 
 		dados = extrair_mencoes_simples(jsonDados['body'])
 		if len(dados) > 0:
+			teste = 1
 			adicionaIssuesSemAcao(item['id'], dados)
 			textJson = '{"id": ' + str(item['id']) + ', "url": "' + str(item['url']) + '"}'
 			sender.send(textJson)
