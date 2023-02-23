@@ -86,8 +86,7 @@ for item in cursor.fetchall():
 		dados = extrair_mencoes(jsonDados['body'])
 		print("Analisando body do :"+ str(item['id']))
 
-		print(jsonDados['body'])
-		print(dados)
+
 		if len(dados) > 0:
 			limparIssuesPR(item['id'])
 			adicionaIssues(item['id'], dados)
@@ -108,5 +107,5 @@ for item in cursor.fetchall():
 
 	except:
 		teste = 1
-		# mudarStatusPullRequest(item['id'], 'erro-ao-analisar-body')
+		mudarStatusPullRequest(item['id'], 'erro-ao-analisar-body')
 

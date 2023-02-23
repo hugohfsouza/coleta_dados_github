@@ -62,6 +62,8 @@ def processar(array_dados):
 			))
 			conn.commit()
 			countSuccess += 1
+		else:
+			print(status_code)
 
 	# só altero o status do PR se eu encontrei as issues
 	if countSuccess == len(issuesVinculadas):

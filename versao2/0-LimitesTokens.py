@@ -3,6 +3,7 @@ import json
 import time
 import sqlite3
 from os import system
+import datetime
 import os
 import configparser
 
@@ -28,7 +29,11 @@ limiteMaximo 		= int(config.get("GERAL", "limiteMaximoAntesDePararOsRequests"))
 limiteMaximo_search = int(config.get("GERAL", "limiteMaximoAntesDePararOsRequestsSearch"))
 
 
-
+def diff_minutes(timestamp):
+	now = datetime.datetime.now()
+	dt_timestamp = datetime.datetime.fromtimestamp(timestamp)
+	diff = (dt_timestamp - now).total_seconds() // 60
+	return diff
 
 def verificarUsoApiGithub():
 	for token in tokens:
@@ -40,7 +45,7 @@ def verificarUsoApiGithub():
 
 		if response.status_code == 200:
 			sql = "UPDATE tokens set requisicoes_restantes = "+str(y["resources"]["core"]['remaining'])+" where token = '"+str(token)+"'";
-			print(y["resources"]["core"]['remaining'])
+			print(str(y["resources"]["core"]['remaining']) + " - Resentando em: "+ str(diff_minutes(y["resources"]["core"]['reset'])))
 		else:
 			print("Erro ao consultar limites")
 

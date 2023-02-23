@@ -9,7 +9,7 @@ config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
 
 limiteInferior 	= config.get("GERAL", "limiteMaximoAntesDePararOsRequests")
-tempoEspera 	= config.get("GERAL", "tempoEsperaProximaValidacaoToken")
+tempoEspera 	= int(config.get("GERAL", "tempoEsperaProximaValidacaoToken"))
 
 class GithubConsumer:
 	def __init__(self):
@@ -44,6 +44,7 @@ class GithubConsumer:
 			dadosToken = self.getToken()
 			if(dadosToken['espera'] != 0):
 				time.sleep(dadosToken['espera'])
+				print("Aguardando próxima janela")
 			else:
 				verificaToken = False
 
@@ -76,6 +77,7 @@ class GithubConsumer:
 			dadosToken = self.getToken()
 			if (dadosToken['espera'] != 0):
 				time.sleep(dadosToken['espera'])
+				print("Aguardando próxima janela")
 			else:
 				verificaToken = False
 

@@ -27,7 +27,9 @@ cursor.execute("""
 		from pull_requests 
 		inner join repositorios on (pull_requests.repo_id = repositorios.id)
 		where repositorios.temTeste = 1 
-		and  json_files is null 
+		and  json_files is null
+		and pull_requests.isBot = 0 
+		and repositorios.id in ('1416', '1965', '1966', '2584', '15260', '15336', '93955', '94133', '94324', '94773')
 """)
 
 totalParaEsperar = 200
@@ -38,7 +40,7 @@ for item in cursor.fetchall():
 	sender.send(textJson)
 	totalAgora += 1
 
-	if(totalAgora >= totalParaEsperar):
-		print("Aguardando respiro");
-		time.sleep(60)
-		totalAgora = 0
+	# if(totalAgora >= totalParaEsperar):
+	# 	print("Aguardando respiro");
+	# 	time.sleep(60)
+	# 	totalAgora = 0

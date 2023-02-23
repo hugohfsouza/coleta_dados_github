@@ -1,5 +1,3 @@
-from matplotlib.pyplot import cla
-from pygit import pull
 from Libs.GithubConsumer import GithubConsumer
 import json
 import sys
@@ -66,7 +64,62 @@ def processar(pullRequest):
 
 	dadosPR = analisarPR(arrayArquivosCompletos, pullRequest['id'], pullRequest['linguagem'])
 
-	
+
+	sql = "UPDATE pull_requests SET functions_removed = %s, " \
+		  "functions_added = %s," \
+		  "functions_others = %s, " \
+		  "tests_removed = %s, " \
+		  "tests_added = %s, " \
+		  "tests_others = %s, " \
+		  "class_removed = %s, " \
+		  "class_added = %s, " \
+		  "class_others = %s, " \
+		  "code_removed = %s, " \
+		  "code_added = %s, " \
+		  "code_others = %s, " \
+		  "imports_removed = %s, " \
+		  "imports_added = %s, " \
+		  "imports_others = %s, " \
+		  "comments_removed = %s, " \
+		  "comments_added = %s, " \
+		  "comments_others = %s, " \
+		  "whitelines_removed = %s, " \
+		  "whitelines_added = %s, " \
+		  "whitelines_others = %s " \
+		  "where id = %s"
+	cursor.execute(sql, (
+		dadosPR['functions']['removed'],
+		dadosPR['functions']['added'],
+		dadosPR['functions']['others'],
+
+		dadosPR['tests']['removed'],
+		dadosPR['tests']['added'],
+		dadosPR['tests']['others'],
+
+		dadosPR['class']['removed'],
+		dadosPR['class']['added'],
+		dadosPR['class']['others'],
+
+		dadosPR['code']['removed'],
+		dadosPR['code']['added'],
+		dadosPR['code']['others'],
+
+		dadosPR['imports']['removed'],
+		dadosPR['imports']['added'],
+		dadosPR['imports']['others'],
+
+		dadosPR['comments']['removed'],
+		dadosPR['comments']['added'],
+		dadosPR['comments']['others'],
+
+		dadosPR['whiteLines']['removed'],
+		dadosPR['whiteLines']['added'],
+		dadosPR['whiteLines']['others'],
+		pullRequest['id']
+	))
+	conn.commit()
+
+	print("PR processado: "+ str(pullRequest['id']))
 
 
 

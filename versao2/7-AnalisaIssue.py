@@ -22,8 +22,19 @@ conn = mysql.connector.connect(pool_name="mypool", pool_size=1, **dbconfig)
 cursor = conn.cursor(dictionary=True);
 
 
+def getTipoIssue(issue_code, repo_id):
+	print(issue_code)
+	print(repo_id)
+	number = issue_code.replace("#", "")
+	cursor.execute("""select 1 from pull_requests where repo_id = %s and number = %s""", (repo_id, number))
+	existe = cursor.fetchone()
+	if existe == None:
+		return 'Issue'
+
+	return 'PR'
+
 cursor.execute("""
-	select pull_requests.id, pull_request_issues.pull_request_id, pull_request_issues.issue_code, pull_request_issues.json_issue
+	select pull_requests.id, pull_request_issues.pull_request_id, pull_request_issues.issue_code, pull_request_issues.json_issue, pull_requests.repo_id
 		from pull_requests 
         inner join pull_request_issues on (pull_requests.id = pull_request_issues.pull_request_id)
 		where 1=1 
@@ -35,10 +46,9 @@ for item in cursor.fetchall():
 	jsonDados = json.loads(item['json_issue'])
 	temBugObvio = 0
 	labelsEncontradas = ""
-	tipoIssue = 'Issue'
+	tipoIssue = getTipoIssue(item['issue_code'], item['repo_id'])
 
-	if 'draft' in jsonDados:
-		tipoIssue = 'PR'
+
 	count = 0
 	for label in jsonDados['labels']:
 		if count == 0:
