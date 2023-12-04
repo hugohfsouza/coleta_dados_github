@@ -1,0 +1,220 @@
+import * as echarts from 'echarts';
+
+var chartDom = document.getElementById('main');
+var myChart = echarts.init(chartDom);
+var option;
+
+option = {
+  tooltip: {},
+  animationDurationUpdate: 1500,
+  animationEasingUpdate: 'quinticInOut',
+  series: [
+    {
+      type: 'graph',
+      layout: 'none',
+      symbolSize: 50,
+      roam: true,
+      label: {
+        show: true
+      },
+      edgeSymbol: ['circle', 'arrow'],
+      edgeSymbolSize: [4, 10],
+      edgeLabel: {
+        fontSize: 20
+      },
+      data: [
+        {
+          name: 'C',
+          x: 300,
+          y: 300
+        },
+        {
+          name: 'C1',
+          x: 800,
+          y: 300
+        },
+        {
+          name: 'CT',
+          x: 550,
+          y: 100
+        },
+        {
+          name: 'CT1',
+          x: 550,
+          y: 500
+        },
+        {
+          name: 'T',
+          x: 800,
+          y: 600
+        },
+        {
+          name: 'T1',
+          x: 600,
+          y: 800
+        }
+      ],
+      // links: [],
+      links: [
+        //CODIGO CODIGO
+        {
+          source: 'C',
+          target: 'C1',
+          label: {
+            show: true,
+            fontSize: 12,
+            formatter: function (d) {
+              return '531.059';
+            }
+          },
+          lineStyle: {
+            width: 9,
+            curveness: 0.2
+          }
+        },
+        //CODIGO PARA CODIGO TESTE
+        {
+          source: 'C',
+          target: 'CT',
+          label: {
+            show: true,
+            fontSize: 12,
+            formatter: function (d) {
+              return '112.074';
+            }
+          },
+          lineStyle: {
+            width: 7,
+            curveness: 0.2
+          }
+        },
+
+        //CODIGO TESTE PARA CODIGO
+        {
+          source: 'CT',
+          target: 'C',
+          label: {
+            show: true,
+            fontSize: 12,
+            formatter: function (d) {
+              return '110.943';
+            }
+          },
+          lineStyle: {
+            width: 6,
+            curveness: 0.2
+          }
+        },
+
+        //CODIGO TESTE PARA CODIGO TESTE
+        {
+          source: 'CT',
+          target: 'CT1',
+          label: {
+            show: true,
+            fontSize: 12,
+            formatter: function (d) {
+              return '198.269';
+            }
+          },
+          lineStyle: {
+            width: 8,
+            curveness: 0.2
+          }
+        },
+
+        //CODIGO TESTE PARA CODIGO TESTE
+        {
+          source: 'T',
+          target: 'C',
+          label: {
+            show: true,
+            fontSize: 12,
+            formatter: function (d) {
+              return '3.827';
+            }
+          },
+          lineStyle: {
+            width: 4,
+            curveness: 0.5
+          }
+        },
+
+        //CODIGO PARA TESTE
+        {
+          source: 'C',
+          target: 'T',
+          label: {
+            show: true,
+            fontSize: 12,
+            formatter: function (d) {
+              return '3.887';
+            }
+          },
+          lineStyle: {
+            width: 5,
+            curveness: 0.5
+          }
+        },
+
+        //TESTE PARA CODIGO TESTE
+        {
+          source: 'T',
+          target: 'CT1',
+          label: {
+            show: true,
+            fontSize: 12,
+            formatter: function (d) {
+              return '3.430';
+            }
+          },
+          lineStyle: {
+            width: 2,
+            curveness: 0.2
+          }
+        },
+
+        //CODIGO TESTE PARA  TESTE
+        {
+          source: 'CT',
+          target: 'T',
+          label: {
+            show: true,
+            fontSize: 12,
+            formatter: function (d) {
+              return '3.737';
+            }
+          },
+          lineStyle: {
+            width: 3,
+            curveness: 0.8
+          }
+        },
+
+        //TESTE  PARA TESTE
+        {
+          source: 'T',
+          target: 'T1',
+          label: {
+            show: true,
+            fontSize: 12,
+            formatter: function (d) {
+              return '937';
+            }
+          },
+          lineStyle: {
+            width: 1,
+            curveness: 0.8
+          }
+        }
+      ],
+      lineStyle: {
+        opacity: 0.9,
+        width: 2,
+        curveness: 0
+      }
+    }
+  ]
+};
+
+option && myChart.setOption(option);

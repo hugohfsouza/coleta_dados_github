@@ -29,7 +29,9 @@ cursor.execute("""
 		where repositorios.temTeste = 1 
 		and  json_files is null
 		and pull_requests.isBot = 0 
-		and repositorios.id in ('1416', '1965', '1966', '2584', '15260', '15336', '93955', '94133', '94324', '94773')
+		and repositorios.educacional = 0
+		-- and repositorios.id in ('1416', '1965', '1966', '2584', '15260', '15336', '93955', '94133', '94324', '94773')
+		and repositorios.id in (select id from repositorios where temTeste = 1 and educacional = 0 and stars_count >= 58142)
 """)
 
 totalParaEsperar = 200

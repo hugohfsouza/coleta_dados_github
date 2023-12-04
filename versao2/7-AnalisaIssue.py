@@ -23,8 +23,8 @@ cursor = conn.cursor(dictionary=True);
 
 
 def getTipoIssue(issue_code, repo_id):
-	print(issue_code)
-	print(repo_id)
+	# print(issue_code)
+	# print(repo_id)
 	number = issue_code.replace("#", "")
 	cursor.execute("""select 1 from pull_requests where repo_id = %s and number = %s""", (repo_id, number))
 	existe = cursor.fetchone()
@@ -34,16 +34,29 @@ def getTipoIssue(issue_code, repo_id):
 	return 'PR'
 
 cursor.execute("""
-	select pull_requests.id, pull_request_issues.pull_request_id, pull_request_issues.issue_code, pull_request_issues.json_issue, pull_requests.repo_id
+	select 
+		pull_requests.id, 
+		pull_request_issues.pull_request_id, 
+		pull_request_issues.issue_code, 
+		uncompress(pull_request_issues.json_issue) as 'json_issue_comp' , 
+		pull_request_issues.json_issue as 'json_issue' , 
+		pull_requests.repo_id
 		from pull_requests 
         inner join pull_request_issues on (pull_requests.id = pull_request_issues.pull_request_id)
 		where 1=1 
 		and status_analise = 'dados-issues-extraidas'
+		and pull_request_issues.bug_obvio is null
+		and pull_request_issues.json_issue is not null
 		-- and id = 3643
 """)
 
 for item in cursor.fetchall():
-	jsonDados = json.loads(item['json_issue'])
+	print(item['repo_id'])
+	try:
+		jsonDados = json.loads(item['json_issue'])
+	except:
+		jsonDados = json.loads(item['json_issue_comp'])
+
 	temBugObvio = 0
 	labelsEncontradas = ""
 	tipoIssue = getTipoIssue(item['issue_code'], item['repo_id'])

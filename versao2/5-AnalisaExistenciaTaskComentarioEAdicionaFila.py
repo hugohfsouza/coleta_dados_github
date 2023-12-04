@@ -8,8 +8,7 @@ from Libs.Queue import Sender
 config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
 
-nomeFila = config.get("FILAS", "nomeFilaRecuperaIssuesVinculadas")
-sender = Sender(nomeFila)
+
 
 dbconfig = {
 	"host": config.get("MYSQL", "host"),
@@ -76,36 +75,42 @@ cursor.execute("""
 	select pull_requests.id, pull_requests.json_request_pr, pull_requests.url
 		from pull_requests 
 		where 1=1 
-		 and status_analise = 'aguardando-analise-body'
-		-- and id = 747824
+			and repo_id in (select id from repositorios where temTeste = 1 and educacional = 0 and stars_count >= 58142)
+			and status_analise = 'aguardando-analise-body'
+			-- and id between 1357943 and 2587412
+			-- and id between 2587413 and 5581362
+			-- and id between 5581363 and 6060032
+		-- limit 30000
 """)
 
+nomeFila = config.get("FILAS", "nomeFilaRecuperaIssuesVinculadas")
+sender = Sender(nomeFila)
+
 for item in cursor.fetchall():
-	try:
-		jsonDados = json.loads(item['json_request_pr'])
+	print("Analisando body do :" + str(item['id']))
+	jsonDados = json.loads(item['json_request_pr'])
+
+	if 'body' in jsonDados:
 		dados = extrair_mencoes(jsonDados['body'])
-		print("Analisando body do :"+ str(item['id']))
-
-
 		if len(dados) > 0:
 			limparIssuesPR(item['id'])
 			adicionaIssues(item['id'], dados)
-			textJson = '{"id": ' + str(item['id']) + ', "url": "' + str(item['url']) + '"}'
-			sender.send(textJson)
 			mudarStatusPullRequest(item['id'])
-		else:
+
+
+		dadosSimples = extrair_mencoes_simples(jsonDados['body'])
+		if len(dadosSimples) > 0:
+			teste = 1
+			adicionaIssuesSemAcao(item['id'], dadosSimples)
+
+		if len(dados) <= 0 and len(dadosSimples) <= 0:
 			teste = 1
 			mudarStatusPullRequest(item['id'], 'body-sem-nenhuma-issue')
-
-		dados = extrair_mencoes_simples(jsonDados['body'])
-		if len(dados) > 0:
-			teste = 1
-			adicionaIssuesSemAcao(item['id'], dados)
+		else:
+			mudarStatusPullRequest(item['id'], 'issues-extraidas')
 			textJson = '{"id": ' + str(item['id']) + ', "url": "' + str(item['url']) + '"}'
 			sender.send(textJson)
+	else:
+		mudarStatusPullRequest(item['id'], 'para-recuperar-body')
 
-
-	except:
-		teste = 1
-		mudarStatusPullRequest(item['id'], 'erro-ao-analisar-body')
 

@@ -103,8 +103,7 @@ create temporary table PRs_classificados_quantidade_prs select
 		WHEN qtdTeste > 0 and qtdCodigo > 0 and qtdOutros > 0 then 'Teste e Codigo'
 		WHEN qtdTeste = 0 and qtdCodigo = 0 and qtdOutros = 0 then 'Sem alteracoes'
 	end as tipoContribuidor, 
-    qtdPrs,
-    
+    qtdPrs
  from (
 	 select 
 		pr.user, 
@@ -124,12 +123,13 @@ create temporary table PRs_classificados_quantidade_prs select
 
 select 
 	count(1), 
+    user,
     qtdPrs
 from PRs_classificados_quantidade_prs
-# where tipoContribuidor = 'Apenas Teste'
+ where tipoContribuidor = 'Apenas Teste'
 # where tipoContribuidor = 'Apenas Codigo'
- where tipoContribuidor = 'Teste e Codigo'
-group by qtdPrs
+# where tipoContribuidor = 'Teste e Codigo'
+group by qtdPrs,user
 
 
 

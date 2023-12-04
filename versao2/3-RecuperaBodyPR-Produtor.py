@@ -7,8 +7,7 @@ config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
 
 
-nomeFila = config.get("FILAS", "nomeFilRecuperarBodyPR")
-sender = Sender(nomeFila)
+
 
 dbconfig = {
 	"host":     config.get("MYSQL", "host"),
@@ -25,10 +24,15 @@ cursor.execute("""
 		from pull_requests 
 		inner join repositorios on (pull_requests.repo_id = repositorios.id)
 		where 1=1
-		and repositorios.id = 1275 
-		-- and status_analise = 'para-recuperar-body'
+			and repo_id in (select id from repositorios where temTeste = 1 and educacional = 0 and stars_count >= 58142)
+			-- and (status_analise = 'para-recuperar-body' or json_request_pr is null)
+			and status_analise = 'para-recuperar-body'
+			-- and json_request_pr is null
+		limit 10000
 """)
 
+nomeFila = config.get("FILAS", "nomeFilRecuperarBodyPR")
+sender = Sender(nomeFila)
 def mudarStatusPullRequest(pullRequestId):
 	sql = "UPDATE pull_requests SET status_analise = 'em-recuperacao-body' where id = %s"
 	cursor.execute(sql, (pullRequestId,))

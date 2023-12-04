@@ -1,7 +1,7 @@
 import configparser
 import time
 import mysql.connector
-from Libs.Queue import Sender
+from Libs.ArquivosJson import ArquivosJson
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
@@ -16,14 +16,18 @@ dbconfig = {
 conn = mysql.connector.connect(pool_name = "mypool", pool_size = 1,**dbconfig)
 cursor = conn.cursor(dictionary=True);
 
-def inserir():
-	sql = "INSERT INTO TESTE(teste, comp) VALUES ('a', compress(%s))"
-	cursor.execute(sql, ('aa',))
-	conn.commit()
+gerenciadorArquivos = ArquivosJson()
 
 def select():
-	cursor.execute("""select json_request_pr, uncompress(json_request_pr_comp) from pull_requests where id = 1""")
+	cursor.execute("""select id, json_request_pr from pull_requests where id = 1""")
 	for item in cursor.fetchall():
-		print(str(item['uncompress(comp)']))
+		print(str(item['json_request_pr']))
+		gerenciadorArquivos.salvar(
+			item['id'],
+			item['json_request_pr'],
+			"json_pull_requests"
+		)
+# select()
 
-select()
+json = gerenciadorArquivos.recuperar(1, "json_pull_requests")
+print(json['commits'])

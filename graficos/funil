@@ -1,0 +1,70 @@
+import * as echarts from 'echarts';
+
+var chartDom = document.getElementById('main');
+var myChart = echarts.init(chartDom);
+var option;
+
+option = {
+  title: {
+    text: ' '
+  },
+  tooltip: {
+    trigger: 'item',
+    formatter: '{a} <br/>{b} : {c}%'
+  },
+  toolbox: {
+    feature: {
+      dataView: { readOnly: false },
+      restore: {},
+      saveAsImage: {}
+    }
+  },
+  legend: {
+    data: ['Show', 'Click', 'Visit', 'Inquiry', 'Order']
+  },
+  series: [
+    {
+      name: 'Funnel',
+      type: 'funnel',
+      left: '10%',
+      top: 60,
+      bottom: 60,
+      width: '80%',
+      min: 0,
+      max: 100,
+      minSize: '0%',
+      maxSize: '100%',
+      sort: 'descending',
+      gap: 2,
+      label: {
+        show: true,
+        position: 'inside'
+      },
+      labelLine: {
+        length: 10,
+        lineStyle: {
+          width: 1,
+          type: 'solid'
+        }
+      },
+      itemStyle: {
+        borderColor: '#fff',
+        borderWidth: 1
+      },
+      emphasis: {
+        label: {
+          fontSize: 20
+        }
+      },
+      data: [
+        { value: 20, name: 'Alteracoes em Teste - 1.059' },
+        { value: 40, name: 'Apenas Teste - 24.457 PRs' },
+        { value: 60, name: 'Bugs - 25.193 issues' },
+        { value: 80, name: 'Issues - 264.861' },
+        { value: 100, name: 'PRs - 460.866' }
+      ]
+    }
+  ]
+};
+
+option && myChart.setOption(option);

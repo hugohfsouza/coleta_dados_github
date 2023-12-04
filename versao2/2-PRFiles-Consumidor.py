@@ -58,10 +58,11 @@ def analisarPR(arrayFiles, pr_id, linguagemReferencia):
 
 
 def processar(pullRequest):
-	arrayArquivosCompletos = githubConsumer.requisitarGithub(pullRequest['url']+"/files");
-
+	try:
+		arrayArquivosCompletos = githubConsumer.requisitarGithub(pullRequest['url']+"/files");
+	except:
+		arrayArquivosCompletos = githubConsumer.requisitarGithub(pullRequest['url'] + "/files");
 	salvarJsonPRFiles(arrayArquivosCompletos, pullRequest['id'])
-
 	dadosPR = analisarPR(arrayArquivosCompletos, pullRequest['id'], pullRequest['linguagem'])
 
 

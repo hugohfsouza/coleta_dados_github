@@ -34,11 +34,11 @@ def processar(array_dados):
 
 	# print(item['url'])
 	print(array_dados['id'])
-	sql = "UPDATE pull_requests SET json_request_pr = %s where id = %s"
+	sql = "UPDATE pull_requests SET json_request_pr = %s, status_analise = 'aguardando-analise-body'  where id = %s"
 	cursor.execute(sql, (json.dumps(dados),array_dados['id']))
 	conn.commit()
 
-	mudarStatusPullRequest(array_dados['id'])
+	# mudarStatusPullRequest(array_dados['id'])
 
 
 def callback(ch, method, properties, body):

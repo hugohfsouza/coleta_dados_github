@@ -3,10 +3,11 @@ import json
 import time
 import sqlite3
 from os import system
-import datetime
 import os
 import configparser
+from datetime import datetime
 
+system("title Check Requests Limits in GITHUB")
 
 config = configparser.ConfigParser(allow_no_value=True)
 config.read("config.ini")
@@ -29,32 +30,28 @@ limiteMaximo 		= int(config.get("GERAL", "limiteMaximoAntesDePararOsRequests"))
 limiteMaximo_search = int(config.get("GERAL", "limiteMaximoAntesDePararOsRequestsSearch"))
 
 
-def diff_minutes(timestamp):
-	now = datetime.datetime.now()
-	dt_timestamp = datetime.datetime.fromtimestamp(timestamp)
-	diff = (dt_timestamp - now).total_seconds() // 60
-	return diff
+
 
 def verificarUsoApiGithub():
-	totalDisponivel = 0
 	for token in tokens:
 		headers = {'Authorization': token, 'Accept': 'application/vnd.github.v3+json'}
 		url = "https://api.github.com/rate_limit"
 		response = requests.get(url, headers=headers)
 		y = json.loads(response.text)
-		sql = "UPDATE tokens set requisicoes_restantes = " + str(0) + " where token = '" + str(token) + "'";
-
-		if response.status_code == 200:
-			sql = "UPDATE tokens set requisicoes_restantes = "+str(y["resources"]["core"]['remaining'])+" where token = '"+str(token)+"'";
-			print(str(y["resources"]["core"]['remaining']) + " - Resentando em: "+ str(diff_minutes(y["resources"]["core"]['reset'])))
-			totalDisponivel += y["resources"]["core"]['remaining']
-		else:
-			print("Erro ao consultar limites")
-
-		cur.execute(sql)
-		con.commit()
-	print("Total Disponivel:" + str(totalDisponivel))
 		
+		if('message' in y):
+			print(token+" "+y['message'])
+		else:
+			date_time = datetime.fromtimestamp(y["resources"]["core"]['reset'])
+			d = date_time.strftime("%X")
+
+			sql = "UPDATE tokens set requisicoes_restantes = "+str(y["resources"]["core"]['remaining'])+" where token = '"+str(token)+"'";
+
+			print(token+"  "+str(y["resources"]["core"]['remaining']) + " resetando em: "+ str(d))
+
+			cur.execute(sql)
+			con.commit()
+			
 
 
 while(True):

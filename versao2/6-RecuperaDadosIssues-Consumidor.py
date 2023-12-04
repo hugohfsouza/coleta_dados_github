@@ -54,7 +54,7 @@ def processar(array_dados):
 		dados, status_code = githubConsumer.requisitaUrlUnica(url_issue)
 
 		if status_code == 200:
-			sql = "UPDATE pull_request_issues SET json_issue = %s where pull_request_id = %s and issue_code = %s"
+			sql = "UPDATE pull_request_issues SET json_issue = compress(%s) where pull_request_id = %s and issue_code = %s"
 			cursor.execute(sql, (
 				json.dumps(dados),
 				array_dados['id'],
