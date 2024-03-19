@@ -40,7 +40,7 @@ def verifyTerms(json_request_pr, pr_id):
 	# ANALISY BODY
 	try:
 		for term in listTerms:
-			if term in json_pr['body']:
+			if term in str(json_pr['body']).lower():
 				numberAppearances += 1
 				presentTerms.append(term)
 	except:
